@@ -3,7 +3,7 @@
 
 # cpp-osx-iokit_iterator
 
-A smart pointer of `io_object_t`.
+A smart pointer of `io_iterator_t`.
 
 ## Requirements
 
