@@ -23,7 +23,7 @@ public:
   explicit iokit_iterator(io_iterator_t iterator) : iterator_(iterator) {
   }
 
-  iokit_iterator(const iokit_object_ptr& iterator) : iterator_(iterator) {
+  explicit iokit_iterator(const iokit_object_ptr& iterator) : iterator_(iterator) {
   }
 
   //
