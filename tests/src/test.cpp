@@ -19,3 +19,14 @@ TEST_CASE("iokit_iterator") {
     REQUIRE(iokit_iterator.valid() == true);
   }
 }
+
+namespace {
+pqrs::osx::iokit_iterator copy_constructor_test(void) {
+  pqrs::osx::iokit_iterator result;
+  return result;
+}
+} // namespace
+
+TEST_CASE("iokit_iterator::copy_constructor_test") {
+  copy_constructor_test();
+}
