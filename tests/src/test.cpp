@@ -10,7 +10,7 @@ TEST_CASE("iokit_iterator") {
   }
 
   {
-    auto entry = IORegistryGetRootEntry(kIOMasterPortDefault);
+    auto entry = IORegistryGetRootEntry(kIOMainPortDefault);
     io_iterator_t it = IO_OBJECT_NULL;
     pqrs::osx::kern_return r = IORegistryEntryGetChildIterator(entry, kIOServicePlane, &it);
     REQUIRE(static_cast<bool>(r) == true);

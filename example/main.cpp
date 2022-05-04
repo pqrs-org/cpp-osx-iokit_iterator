@@ -26,7 +26,7 @@ void print_class_name(const pqrs::osx::iokit_object_ptr& object_ptr) {
 } // namespace
 
 int main(void) {
-  auto entry = IORegistryGetRootEntry(kIOMasterPortDefault);
+  auto entry = IORegistryGetRootEntry(kIOMainPortDefault);
   print_class_name(pqrs::osx::iokit_object_ptr(entry));
 
   return 0;
