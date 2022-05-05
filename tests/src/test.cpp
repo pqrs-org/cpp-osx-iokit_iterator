@@ -2,6 +2,7 @@
 #include <catch2/catch.hpp>
 
 #include <pqrs/osx/iokit_iterator.hpp>
+#include <pqrs/osx/iokit_types.hpp>
 
 TEST_CASE("iokit_iterator") {
   {
@@ -10,7 +11,7 @@ TEST_CASE("iokit_iterator") {
   }
 
   {
-    auto entry = IORegistryGetRootEntry(kIOMainPortDefault);
+    auto entry = IORegistryGetRootEntry(type_safe::get(pqrs::osx::iokit_mach_port::null));
     io_iterator_t it = IO_OBJECT_NULL;
     pqrs::osx::kern_return r = IORegistryEntryGetChildIterator(entry, kIOServicePlane, &it);
     REQUIRE(static_cast<bool>(r) == true);
