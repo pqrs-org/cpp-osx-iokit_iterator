@@ -1,6 +1,7 @@
 #include <IOKit/IOKitLib.h>
 #include <iostream>
 #include <pqrs/osx/iokit_iterator.hpp>
+#include <pqrs/osx/iokit_types.hpp>
 
 namespace {
 void print_class_name(const pqrs::osx::iokit_object_ptr& object_ptr) {
@@ -26,7 +27,7 @@ void print_class_name(const pqrs::osx::iokit_object_ptr& object_ptr) {
 } // namespace
 
 int main(void) {
-  auto entry = IORegistryGetRootEntry(kIOMainPortDefault);
+  auto entry = IORegistryGetRootEntry(type_safe::get(pqrs::osx::iokit_mach_port::null));
   print_class_name(pqrs::osx::iokit_object_ptr(entry));
 
   return 0;
