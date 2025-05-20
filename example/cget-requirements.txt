@@ -1,2 +1,0 @@
-pqrs-org/cpp-osx-iokit_object_ptr
-pqrs-org/cpp-osx-iokit_types
