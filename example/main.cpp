@@ -8,7 +8,7 @@ void print_class_name(const pqrs::osx::iokit_object_ptr& object_ptr) {
   io_iterator_t it = IO_OBJECT_NULL;
   pqrs::osx::kern_return r = IORegistryEntryGetChildIterator(*object_ptr, kIOServicePlane, &it);
   if (r) {
-    pqrs::osx::iokit_iterator iokit_iterator(it);
+    auto iokit_iterator = pqrs::osx::adopt_iokit_iterator(it);
 
     while (true) {
       auto next = iokit_iterator.next();
@@ -26,9 +26,9 @@ void print_class_name(const pqrs::osx::iokit_object_ptr& object_ptr) {
 }
 } // namespace
 
-int main(void) {
-  auto entry = IORegistryGetRootEntry(type_safe::get(pqrs::osx::iokit_mach_port::null));
-  print_class_name(pqrs::osx::iokit_object_ptr(entry));
+int main() {
+  auto entry = pqrs::osx::adopt_iokit_object_ptr(IORegistryGetRootEntry(type_safe::get(pqrs::osx::iokit_mach_port::null)));
+  print_class_name(entry);
 
   return 0;
 }
