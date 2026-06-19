@@ -8,6 +8,17 @@ pqrs::osx::iokit_iterator copy_constructor_test() {
   pqrs::osx::iokit_iterator result;
   return result;
 }
+
+io_iterator_t make_child_iterator() {
+  auto entry = pqrs::osx::adopt_iokit_object_ptr(IORegistryGetRootEntry(type_safe::get(pqrs::osx::iokit_mach_port::null)));
+  boost::ut::expect(static_cast<bool>(entry) == true);
+
+  io_iterator_t it = IO_OBJECT_NULL;
+  pqrs::osx::kern_return r = IORegistryEntryGetChildIterator(*entry, kIOServicePlane, &it);
+  boost::ut::expect(static_cast<bool>(r) == true);
+
+  return it;
+}
 } // namespace
 
 int main() {
@@ -29,14 +40,7 @@ int main() {
   };
 
   "child iterator"_test = [] {
-    auto entry = pqrs::osx::adopt_iokit_object_ptr(IORegistryGetRootEntry(type_safe::get(pqrs::osx::iokit_mach_port::null)));
-    expect(static_cast<bool>(entry) == true);
-
-    io_iterator_t it = IO_OBJECT_NULL;
-    pqrs::osx::kern_return r = IORegistryEntryGetChildIterator(*entry, kIOServicePlane, &it);
-    expect(static_cast<bool>(r) == true);
-
-    auto iokit_iterator = pqrs::osx::adopt_iokit_iterator(it);
+    auto iokit_iterator = pqrs::osx::adopt_iokit_iterator(make_child_iterator());
     expect(iokit_iterator.valid() == true);
     expect(static_cast<bool>(iokit_iterator) == true);
 
@@ -54,31 +58,56 @@ int main() {
 
   "constructor from iokit_object_ptr"_test = [] {
     {
-      auto entry = pqrs::osx::adopt_iokit_object_ptr(IORegistryGetRootEntry(type_safe::get(pqrs::osx::iokit_mach_port::null)));
-      expect(static_cast<bool>(entry) == true);
-
-      io_iterator_t it = IO_OBJECT_NULL;
-      pqrs::osx::kern_return r = IORegistryEntryGetChildIterator(*entry, kIOServicePlane, &it);
-      expect(static_cast<bool>(r) == true);
-
-      auto iterator_object = pqrs::osx::adopt_iokit_object_ptr(it);
+      auto iterator_object = pqrs::osx::adopt_iokit_object_ptr(make_child_iterator());
       pqrs::osx::iokit_iterator iokit_iterator(iterator_object);
       expect(iokit_iterator.valid() == true);
     }
   };
 
   "constructor from moved iokit_object_ptr"_test = [] {
-    auto entry = pqrs::osx::adopt_iokit_object_ptr(IORegistryGetRootEntry(type_safe::get(pqrs::osx::iokit_mach_port::null)));
-    expect(static_cast<bool>(entry) == true);
-
-    io_iterator_t it = IO_OBJECT_NULL;
-    pqrs::osx::kern_return r = IORegistryEntryGetChildIterator(*entry, kIOServicePlane, &it);
-    expect(static_cast<bool>(r) == true);
-
-    auto iterator_object = pqrs::osx::adopt_iokit_object_ptr(it);
+    auto iterator_object = pqrs::osx::adopt_iokit_object_ptr(make_child_iterator());
     pqrs::osx::iokit_iterator iokit_iterator(std::move(iterator_object));
     expect(iokit_iterator.valid() == true);
     expect(static_cast<bool>(iterator_object) == false);
+  };
+
+  "retain count"_test = [] {
+    {
+      auto it = make_child_iterator();
+      auto retain_count = IOObjectGetUserRetainCount(it);
+      expect(retain_count > 0U);
+
+      auto iokit_iterator = pqrs::osx::adopt_iokit_iterator(it);
+      expect(iokit_iterator.get().get() == it);
+      expect(iokit_iterator.get().user_retain_count() == retain_count);
+    }
+
+    {
+      auto iterator_object = pqrs::osx::adopt_iokit_object_ptr(make_child_iterator());
+      auto retain_count = iterator_object.user_retain_count();
+      expect(retain_count > 0U);
+
+      pqrs::osx::iokit_iterator iokit_iterator(iterator_object);
+      expect(iterator_object.user_retain_count() == retain_count + 1);
+      expect(iokit_iterator.get().user_retain_count() == retain_count + 1);
+    }
+
+    {
+      auto iterator_object = pqrs::osx::adopt_iokit_object_ptr(make_child_iterator());
+      auto retain_count = iterator_object.user_retain_count();
+      expect(retain_count > 0U);
+
+      pqrs::osx::iokit_iterator iokit_iterator(std::move(iterator_object));
+      expect(iokit_iterator.get().user_retain_count() == retain_count);
+      expect(static_cast<bool>(iterator_object) == false);
+    }
+
+    {
+      auto iokit_iterator = pqrs::osx::adopt_iokit_iterator(make_child_iterator());
+      auto first = iokit_iterator.next();
+      expect(static_cast<bool>(first) == true);
+      expect(first.user_retain_count() == 1U);
+    }
   };
 
   return 0;
