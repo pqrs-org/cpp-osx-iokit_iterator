@@ -16,9 +16,7 @@ public:
   // Constructors
   //
 
-  iokit_iterator() noexcept
-      : iokit_iterator(IO_OBJECT_NULL) {
-  }
+  iokit_iterator() noexcept = default;
 
   explicit iokit_iterator(io_iterator_t iterator) noexcept
       : iterator_(iterator) {
